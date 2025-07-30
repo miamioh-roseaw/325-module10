@@ -5,14 +5,15 @@ pipeline {
     SUDO_PASS = credentials('jenkins-sudo-creds')
   }
 
-  stages {
-    stage('Install Chef Workstation') {
+    stage('Install and Run Chef Solo') {
       steps {
-        echo "[INFO] Installing Chef Workstation with sudo..."
-
-        script {
+        withCredentials([usernamePassword(credentialsId: 'jenkins-sudo-creds', passwordVariable: 'SUDO_PASS', usernameVariable: 'SUDO_USER')]) {
           sh '''
-            echo "$SUDO_PASS" | sudo -S bash install_chef.sh
+            echo "[INFO] Installing Chef Solo..."
+            echo "$SUDO_PASS" | sudo -S bash install_chef_solo.sh
+    
+            echo "[INFO] Running Chef Solo..."
+            sudo chef-solo -c solo.rb -o 'banner_cookbook'
           '''
         }
       }
