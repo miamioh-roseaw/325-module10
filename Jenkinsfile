@@ -3,6 +3,7 @@ pipeline {
 
   environment {
     CHEF_URL = 'https://omnitruck.chef.io/install.sh'
+     SUDO_PASS = credentials('jenkins-sudo-creds')
   }
 
   stages {
