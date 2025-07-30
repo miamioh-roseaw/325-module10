@@ -2,26 +2,52 @@ pipeline {
   agent any
 
   environment {
-    CISCO_USER = credentials('CISCO_CREDS_USR')
-    CISCO_PASS = credentials('CISCO_CREDS_PSW')
+    CHEF_REPO = '.'  // Flat structure
+    CISCO_CREDS = credentials('cisco-ssh-creds')
+    PATH = "${HOME}/.local/bin:${env.PATH}"
   }
 
   stages {
-    stage('Install Chef Workstation') {
+
+    stage('Install Dependencies') {
       steps {
-        sh 'chmod +x install_chef.sh && ./install_chef.sh'
+        sh '''
+          # Ensure sshpass is installed
+          if ! command -v sshpass > /dev/null; then
+            echo "[INFO] Installing sshpass..."
+            sudo apt-get update && sudo apt-get install -y sshpass
+          fi
+
+          # Install Chef if needed
+          if ! command -v chef-client > /dev/null; then
+            echo "[INFO] Installing Chef..."
+            curl -L https://omnitruck.chef.io/install.sh | sudo bash
+          else
+            echo "[INFO] Chef already installed."
+          fi
+        '''
       }
     }
 
-    stage('Set Cisco Banner with Chef') {
+    stage('Run Chef Banner Config') {
       steps {
-        echo "[INFO] Running Chef Recipe..."
-        sh '''
-          export CISCO_USER=$CISCO_USER
-          export CISCO_PASS=$CISCO_PASS
-          chef-apply set_banner.rb
-        '''
+        dir("${CHEF_REPO}") {
+          sh '''
+            echo "[INFO] Running Chef recipe..."
+
+            export CISCO_CREDS_USR="${CISCO_CREDS_USR}"
+            export CISCO_CREDS_PSW="${CISCO_CREDS_PSW}"
+
+            chef-apply recipes/default.rb
+          '''
+        }
       }
+    }
+  }
+
+  post {
+    always {
+      echo "[INFO] Pipeline completed"
     }
   }
 }
