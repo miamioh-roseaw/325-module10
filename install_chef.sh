@@ -6,7 +6,7 @@ echo "[INFO] Installing Chef Solo with wget..."
 
 # Make sure wget and required tools are installed
 sudo apt-get update
-sudo apt-get install -y wget curl gnupg
+sudo apt-get install -y wget gnupg
 
 # Download and install the Chef installer script
 wget https://omnitruck.chef.io/install.sh -O install.sh
