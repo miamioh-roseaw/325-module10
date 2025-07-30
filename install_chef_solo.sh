@@ -1,15 +1,22 @@
 #!/bin/bash
-
 set -e
 
-echo "[INFO] Installing Chef Workstation using wget..."
+echo "[INFO] Installing Chef Workstation (supports chef-solo) using wget..."
 
-# Download a valid version (double-checked 25.5.1049 is available)
-wget https://packages.chef.io/files/stable/chef-workstation/25.5.1049/ubuntu/22.04/chef-workstation_25.5.1049-1_amd64.deb -O /tmp/chef-workstation.deb
+# Ensure wget is available
+if ! command -v wget >/dev/null; then
+  echo "[INFO] Installing wget..."
+  sudo apt-get update
+  sudo apt-get install -y wget
+fi
 
-echo "[INFO] Installing Chef Workstation..."
+# Download the correct package for 22.04
+wget https://packages.chef.io/files/stable/chef-workstation/25.5.1084/ubuntu/22.04/chef-workstation_25.5.1084-1_amd64.deb \
+  -O /tmp/chef-workstation.deb
+
+echo "[INFO] Installing Chef Workstation package..."
 sudo dpkg -i /tmp/chef-workstation.deb
+echo "[INFO] Chef installation complete."
 
-# Verify installation
-echo "[INFO] Installed version:"
+# Confirm the install
 chef -v
