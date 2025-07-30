@@ -2,20 +2,15 @@
 
 set -e
 
-echo "[INFO] Installing Chef Solo with wget..."
+echo "[INFO] Installing Chef Workstation using wget..."
 
-# Make sure wget and required tools are installed
-sudo apt-get update
-sudo apt-get install -y wget gnupg
+# Download Chef Workstation .deb package
+wget https://packages.chef.io/files/stable/chef-workstation/23.10.1043/ubuntu/22.04/chef-workstation_23.10.1043-1_amd64.deb -O /tmp/chef-workstation.deb
 
-# Download and install the Chef installer script
-wget https://omnitruck.chef.io/install.sh -O install.sh
-sudo bash install.sh -v 16.18.14
+echo "[INFO] Installing Chef Workstation..."
+sudo dpkg -i /tmp/chef-workstation.deb
 
-# Verify installation
-if ! command -v chef-solo &>/dev/null; then
-  echo "[ERROR] Chef Solo installation failed."
-  exit 1
-fi
+# Confirm installation
+echo "[INFO] Verifying installation..."
+chef -v
 
-echo "[INFO] Chef Solo installed successfully."
